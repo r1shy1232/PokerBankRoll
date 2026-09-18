@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Settle Up">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f3d2e">
+<title>Settle Up</title>
+<style>
+  :root {
+    --felt: #0f3d2e;
+    --felt-dark: #0a2b20;
+    --felt-light: #16523e;
+    --cream: #f2ede1;
+    --chip-red: #b7472a;
+    --chip-red-dark: #8f3520;
+    --chip-gold: #c9a24b;
+    --ink: #142018;
+    --line: rgba(242,237,225,0.14);
+    --up: #7bb88f;
+    --down: #d98a6e;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--felt);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 50% -10%, var(--felt-light) 0%, transparent 60%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px);
+    color: var(--cream);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 18px 60px;
+  }
+
+  header {
+    margin-bottom: 22px;
+  }
+
+  .eyebrow-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--cream);
+  }
+
+  .suit {
+    font-size: 20px;
+    opacity: 0.7;
+    color: var(--chip-gold);
+  }
+
+  .sub {
+    font-size: 14px;
+    color: rgba(242,237,225,0.55);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .pot-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 22px 0 18px;
+    padding: 14px 16px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+
+  .pot-strip .label {
+    font-size: 12px;
+    text-transform: none;
+    color: rgba(242,237,225,0.5);
+  }
+
+  .pot-strip .value {
+    font-family: "Courier New", monospace;
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pot-strip .value.balanced { color: var(--up); }
+  .pot-strip .value.unbalanced { color: var(--down); }
+
+  .players {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .player-card {
+    background: rgba(0,0,0,0.16);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 6px 10px;
+    align-items: center;
+  }
+
+  .player-name-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .player-name-row input[type="text"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--cream);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 4px 2px;
+    font-family: inherit;
+  }
+
+  .player-name-row input[type="text"]:focus {
+    outline: none;
+    border-bottom-color: var(--chip-gold);
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: rgba(242,237,225,0.35);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 6px;
+    line-height: 1;
+  }
+  .remove-btn:hover { color: var(--chip-red); }
+  .remove-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; border-radius: 4px; }
+
+  .field-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .field label {
+    font-size: 11px;
+    color: rgba(242,237,225,0.45);
+  }
+
+  .field .input-prefix {
+    position: relative;
+  }
+
+  .field .input-prefix::before {
+    content: "$";
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(242,237,225,0.4);
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .field input[type="number"] {
+    width: 100%;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--cream);
+    font-family: "Courier New", monospace;
+    font-size: 15px;
+    padding: 7px 8px 7px 20px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .field input[type="number"]:focus {
+    outline: none;
+    border-color: var(--chip-gold);
+  }
+
+  .field input[type="number"]::-webkit-outer-spin-button,
+  .field input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .net-tag {
+    grid-column: 1 / -1;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    text-align: right;
+    padding-top: 2px;
+  }
+
+  .net-tag .amt.up { color: var(--up); }
+  .net-tag .amt.down { color: var(--down); }
+  .net-tag .amt.even { color: rgba(242,237,225,0.4); }
+
+  .add-player-btn {
+    width: 100%;
+    background: rgba(242,237,225,0.06);
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    color: rgba(242,237,225,0.65);
+    font-size: 14px;
+    padding: 12px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    font-family: inherit;
+  }
+  .add-player-btn:hover {
+    background: rgba(242,237,225,0.1);
+    color: var(--cream);
+  }
+  .add-player-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
+
+  .settle-section h2 {
+    font-family: Georgia, serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--chip-gold);
+  }
+
+  .settle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .settle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 14px;
+  }
+
+  .settle-row .from { color: var(--down); font-weight: 600; }
+  .settle-row .arrow { color: rgba(242,237,225,0.35); font-size: 13px; }
+  .settle-row .to { color: var(--up); font-weight: 600; }
+  .settle-row .amt {
+    margin-left: auto;
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .empty-settle {
+    color: rgba(242,237,225,0.4);
+    font-size: 14px;
+    padding: 16px 4px;
+    text-align: center;
+  }
+
+  .save-row {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .save-session-btn {
+    background: var(--chip-gold);
+    border: none;
+    color: var(--felt-dark);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 22px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .save-session-btn:hover { filter: brightness(1.08); }
+  .save-session-btn:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; }
+  .save-session-btn.saved {
+    background: var(--up);
+    color: var(--felt-dark);
+  }
+
+  .history-section {
+    margin-top: 30px;
+  }
+
+  .history-section h2 {
+    font-family: Georgia, serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--chip-gold);
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .history-card {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .history-card .hist-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .history-card .hist-date {
+    font-size: 13px;
+    color: rgba(242,237,225,0.5);
+  }
+
+  .history-card .hist-remove {
+    background: none;
+    border: none;
+    color: rgba(242,237,225,0.3);
+    font-size: 15px;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+  .history-card .hist-remove:hover { color: var(--chip-red); }
+
+  .history-card .hist-players {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+  }
+
+  .history-card .hist-player-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: baseline;
+  }
+
+  .history-card .hist-player-name {
+    color: rgba(242,237,225,0.75);
+  }
+
+  .history-card .hist-player-buyin {
+    color: rgba(242,237,225,0.4);
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .history-card .hist-player-net {
+    font-family: "Courier New", monospace;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 66px;
+  }
+
+  .history-card .hist-player-net.up { color: var(--up); }
+  .history-card .hist-player-net.down { color: var(--down); }
+  .history-card .hist-player-net.even { color: rgba(242,237,225,0.4); }
+
+  .hist-pay-wrap {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .hist-pay-label {
+    font-size: 11px;
+    color: rgba(242,237,225,0.4);
+    margin-bottom: 2px;
+  }
+
+  .hist-pay-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .hist-pay-from { color: var(--down); font-weight: 600; }
+  .hist-pay-arrow { color: rgba(242,237,225,0.35); font-size: 12px; }
+  .hist-pay-to { color: var(--up); font-weight: 600; }
+  .hist-pay-amt {
+    margin-left: auto;
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+  }
+
+  .reset-row {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid rgba(215,138,110,0.4);
+    color: var(--down);
+    font-size: 13px;
+    padding: 9px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .reset-btn:hover {
+    background: rgba(215,138,110,0.1);
+  }
+  .reset-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .player-card, .settle-row { transition: border-color 0.15s ease; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow-row">
+      <h1>Settle Up</h1>
+      <span class="suit">♠</span>
+    </div>
+    <div class="sub">Enter what everyone bought in for and cashed out with. This works out who pays who.</div>
+  </header>
+
+  <div class="pot-strip">
+    <div>
+      <div class="label">Buy-ins vs cash-outs</div>
+      <div class="value" id="potValue">$0</div>
+    </div>
+  </div>
+
+  <div class="players" id="players"></div>
+  <datalist id="savedNames"></datalist>
+
+  <button class="add-player-btn" id="addPlayerBtn">+ Add player</button>
+
+  <div class="settle-section">
+    <h2>Who pays who</h2>
+    <div class="settle-list" id="settleList"></div>
+  </div>
+
+  <div class="save-row">
+    <button class="save-session-btn" id="saveSessionBtn">Save this session</button>
+  </div>
+
+  <div class="history-section" id="historySection" hidden>
+    <h2>Past sessions</h2>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <div class="reset-row">
+    <button class="reset-btn" id="resetBtn">Reset table</button>
+    <button class="reset-btn" id="forgetNamesBtn" style="margin-left:10px;">Forget saved names</button>
+    <button class="reset-btn" id="clearHistoryBtn" style="margin-left:10px;">Clear history</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  let players = [];
+  let idCounter = 0;
+  let savedNamesCache = [];
+  let historyCache = [];
+  const STORAGE_KEY = "settleup_saved_names_v1";
+  const HISTORY_KEY = "settleup_history_v1";
+
+  function initStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          savedNamesCache = parsed.filter((n) => typeof n === "string");
+        }
+      }
+    } catch (e) {
+      // localStorage unavailable (private browsing, etc) — app still works, just won't remember names
+      savedNamesCache = [];
+    }
+    try {
+      const rawHist = localStorage.getItem(HISTORY_KEY);
+      if (rawHist) {
+        const parsedHist = JSON.parse(rawHist);
+        if (Array.isArray(parsedHist)) {
+          historyCache = parsedHist;
+        }
+      }
+    } catch (e) {
+      historyCache = [];
+    }
+  }
+
+  function loadHistory() {
+    return historyCache.slice();
+  }
+
+  function saveHistory(sessions) {
+    // Keep most recent 100 sessions to stay well under storage limits
+    const trimmed = sessions.slice(-100);
+    historyCache = trimmed;
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    } catch (e) {
+      // storage full or unavailable — session list still works in-memory for this visit
+    }
+  }
+
+  function addSessionToHistory(session) {
+    saveHistory(loadHistory().concat([session]));
+  }
+
+  function removeSessionFromHistory(sessionId) {
+    saveHistory(loadHistory().filter((s) => s.id !== sessionId));
+  }
+
+  function loadSavedNames() {
+    return savedNamesCache.slice();
+  }
+
+  function saveNames(names) {
+    const unique = Array.from(new Set(names.map((n) => n.trim()).filter(Boolean))).slice(0, 30);
+    savedNamesCache = unique;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(unique));
+    } catch (e) {
+      // storage full or unavailable — session still works, just won't persist
+    }
+  }
+
+  function rememberCurrentNames() {
+    const saved = loadSavedNames();
+    const current = players.map((p) => p.name).filter((n) => n && n.trim());
+    saveNames(saved.concat(current));
+  }
+
+  function newPlayer(name) {
+    idCounter += 1;
+    return { id: idCounter, name: name || "", buyIn: "", cashOut: "" };
+  }
+
+  function loadDefault() {
+    const saved = loadSavedNames();
+    if (saved.length >= 2) {
+      players = saved.slice(0, 2).map((n) => newPlayer(n));
+    } else if (saved.length === 1) {
+      players = [newPlayer(saved[0]), newPlayer("")];
+    } else {
+      players = [newPlayer(""), newPlayer("")];
+    }
+  }
+
+  const playersEl = document.getElementById("players");
+  const settleListEl = document.getElementById("settleList");
+  const potValueEl = document.getElementById("potValue");
+  const addPlayerBtn = document.getElementById("addPlayerBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const saveSessionBtn = document.getElementById("saveSessionBtn");
+  const historySection = document.getElementById("historySection");
+  const historyListEl = document.getElementById("historyList");
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+  function fmt(n) {
+    const sign = n < 0 ? "-" : "";
+    return sign + "$" + Math.abs(n).toFixed(2).replace(/\.00$/, "");
+  }
+
+  function render() {
+    playersEl.innerHTML = "";
+
+    players.forEach((p, i) => {
+      const buyIn = parseFloat(p.buyIn) || 0;
+      const cashOut = parseFloat(p.cashOut) || 0;
+      const net = cashOut - buyIn;
+
+      const card = document.createElement("div");
+      card.className = "player-card";
+
+      const nameRow = document.createElement("div");
+      nameRow.className = "player-name-row";
+
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.placeholder = "Player " + (i + 1);
+      nameInput.value = p.name;
+      nameInput.setAttribute("list", "savedNames");
+      nameInput.setAttribute("aria-label", "Player name");
+      nameInput.addEventListener("input", (e) => {
+        p.name = e.target.value;
+        renderSettle();
+        renderPot();
+      });
+      nameInput.addEventListener("blur", () => {
+        if (p.name && p.name.trim()) {
+          saveNames(loadSavedNames().concat([p.name]));
+          refreshDatalist();
+        }
+      });
+      nameRow.appendChild(nameInput);
+
+      if (players.length > 1) {
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "✕";
+        removeBtn.setAttribute("aria-label", "Remove player");
+        removeBtn.addEventListener("click", () => {
+          players = players.filter((pl) => pl.id !== p.id);
+          render();
+        });
+        nameRow.appendChild(removeBtn);
+      }
+
+      card.appendChild(nameRow);
+
+      const fieldRow = document.createElement("div");
+      fieldRow.className = "field-row";
+
+      const buyField = document.createElement("div");
+      buyField.className = "field";
+      const buyLabel = document.createElement("label");
+      buyLabel.textContent = "Bought in";
+      const buyWrap = document.createElement("div");
+      buyWrap.className = "input-prefix";
+      const buyInput = document.createElement("input");
+      buyInput.type = "number";
+      buyInput.min = "0";
+      buyInput.step = "0.01";
+      buyInput.inputMode = "decimal";
+      buyInput.placeholder = "0";
+      buyInput.value = p.buyIn;
+      buyInput.addEventListener("input", (e) => {
+        p.buyIn = e.target.value;
+        renderSettle();
+        renderPot();
+        updateNetTag(card, p);
+      });
+      buyWrap.appendChild(buyInput);
+      buyField.appendChild(buyLabel);
+      buyField.appendChild(buyWrap);
+
+      const cashField = document.createElement("div");
+      cashField.className = "field";
+      const cashLabel = document.createElement("label");
+      cashLabel.textContent = "Cashed out";
+      const cashWrap = document.createElement("div");
+      cashWrap.className = "input-prefix";
+      const cashInput = document.createElement("input");
+      cashInput.type = "number";
+      cashInput.min = "0";
+      cashInput.step = "0.01";
+      cashInput.inputMode = "decimal";
+      cashInput.placeholder = "0";
+      cashInput.value = p.cashOut;
+      cashInput.addEventListener("input", (e) => {
+        p.cashOut = e.target.value;
+        renderSettle();
+        renderPot();
+        updateNetTag(card, p);
+      });
+      cashWrap.appendChild(cashInput);
+      cashField.appendChild(cashLabel);
+      cashField.appendChild(cashWrap);
+
+      fieldRow.appendChild(buyField);
+      fieldRow.appendChild(cashField);
+      card.appendChild(fieldRow);
+
+      const netTag = document.createElement("div");
+      netTag.className = "net-tag";
+      card.appendChild(netTag);
+
+      playersEl.appendChild(card);
+      updateNetTag(card, p);
+    });
+
+    renderSettle();
+    renderPot();
+  }
+
+  function updateNetTag(card, p) {
+    const netTag = card.querySelector(".net-tag");
+    const buyIn = parseFloat(p.buyIn) || 0;
+    const cashOut = parseFloat(p.cashOut) || 0;
+    const net = cashOut - buyIn;
+    let cls = "even";
+    let text = "even";
+    if (net > 0.001) { cls = "up"; text = "up " + fmt(net); }
+    else if (net < -0.001) { cls = "down"; text = "down " + fmt(Math.abs(net)); }
+    netTag.innerHTML = '<span class="amt ' + cls + '">' + text + "</span>";
+  }
+
+  function renderPot() {
+    const totalBuyIn = players.reduce((s, p) => s + (parseFloat(p.buyIn) || 0), 0);
+    const totalCashOut = players.reduce((s, p) => s + (parseFloat(p.cashOut) || 0), 0);
+    const diff = totalCashOut - totalBuyIn;
+    if (totalBuyIn === 0 && totalCashOut === 0) {
+      potValueEl.textContent = "$0";
+      potValueEl.className = "value";
+      return;
+    }
+    if (Math.abs(diff) < 0.01) {
+      potValueEl.textContent = "Balanced";
+      potValueEl.className = "value balanced";
+    } else {
+      potValueEl.textContent = (diff > 0 ? "+" : "") + fmt(diff) + " off";
+      potValueEl.className = "value unbalanced";
+    }
+  }
+
+  function computeNets(playerList) {
+    return playerList
+      .map((p, i) => ({
+        name: p.name.trim() || "Player " + (i + 1),
+        buyIn: parseFloat(p.buyIn) || 0,
+        cashOut: parseFloat(p.cashOut) || 0,
+        net: (parseFloat(p.cashOut) || 0) - (parseFloat(p.buyIn) || 0),
+      }))
+      .filter((p) => p.buyIn > 0 || p.cashOut > 0);
+  }
+
+  function computeTransactions(nets) {
+    const debtors = nets.filter((p) => p.net < -0.001).map((p) => ({ name: p.name, amt: -p.net }));
+    const creditors = nets.filter((p) => p.net > 0.001).map((p) => ({ name: p.name, amt: p.net }));
+
+    debtors.sort((a, b) => b.amt - a.amt);
+    creditors.sort((a, b) => b.amt - a.amt);
+
+    const transactions = [];
+    let di = 0, ci = 0;
+    while (di < debtors.length && ci < creditors.length) {
+      const d = debtors[di];
+      const c = creditors[ci];
+      const amt = Math.min(d.amt, c.amt);
+      if (amt > 0.001) {
+        transactions.push({ from: d.name, to: c.name, amt: amt });
+      }
+      d.amt -= amt;
+      c.amt -= amt;
+      if (d.amt < 0.005) di++;
+      if (c.amt < 0.005) ci++;
+    }
+    return transactions;
+  }
+
+  function renderSettle() {
+    settleListEl.innerHTML = "";
+
+    const nets = computeNets(players);
+
+    if (nets.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty-settle";
+      empty.textContent = "Add buy-ins and cash-outs to see who owes who.";
+      settleListEl.appendChild(empty);
+      return;
+    }
+
+    const transactions = computeTransactions(nets);
+
+    if (transactions.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty-settle";
+      empty.textContent = "Everyone's even.";
+      settleListEl.appendChild(empty);
+      return;
+    }
+
+    transactions.forEach((t) => {
+      const row = document.createElement("div");
+      row.className = "settle-row";
+      row.innerHTML =
+        '<span class="from">' + escapeHtml(t.from) + '</span>' +
+        '<span class="arrow">pays</span>' +
+        '<span class="to">' + escapeHtml(t.to) + '</span>' +
+        '<span class="amt">' + fmt(t.amt) + '</span>';
+      settleListEl.appendChild(row);
+    });
+  }
+
+  function refreshDatalist() {
+    const listEl = document.getElementById("savedNames");
+    listEl.innerHTML = "";
+    loadSavedNames().forEach((n) => {
+      const opt = document.createElement("option");
+      opt.value = n;
+      listEl.appendChild(opt);
+    });
+  }
+
+  function renderHistory() {
+    const sessions = loadHistory().slice().reverse(); // most recent first
+    historyListEl.innerHTML = "";
+
+    if (sessions.length === 0) {
+      historySection.hidden = true;
+      return;
+    }
+
+    historySection.hidden = false;
+
+    sessions.forEach((session) => {
+      const card = document.createElement("div");
+      card.className = "history-card";
+
+      const top = document.createElement("div");
+      top.className = "hist-top";
+
+      const dateEl = document.createElement("div");
+      dateEl.className = "hist-date";
+      dateEl.textContent = session.dateLabel;
+      top.appendChild(dateEl);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "hist-remove";
+      removeBtn.textContent = "✕";
+      removeBtn.setAttribute("aria-label", "Delete this session");
+      removeBtn.addEventListener("click", () => {
+        removeSessionFromHistory(session.id);
+        renderHistory();
+      });
+      top.appendChild(removeBtn);
+
+      card.appendChild(top);
+
+      const playersWrap = document.createElement("div");
+      playersWrap.className = "hist-players";
+
+      session.players.forEach((p) => {
+        const row = document.createElement("div");
+        row.className = "hist-player-row";
+        let cls = "even";
+        let text = "even";
+        if (p.net > 0.001) { cls = "up"; text = "up " + fmt(p.net); }
+        else if (p.net < -0.001) { cls = "down"; text = "down " + fmt(Math.abs(p.net)); }
+        const buyInText = "bought in " + fmt(p.buyIn);
+        row.innerHTML =
+          '<span class="hist-player-name">' + escapeHtml(p.name) + '</span>' +
+          '<span class="hist-player-buyin">' + buyInText + '</span>' +
+          '<span class="hist-player-net ' + cls + '">' + text + '</span>';
+        playersWrap.appendChild(row);
+      });
+
+      card.appendChild(playersWrap);
+
+      const transactions = session.transactions || [];
+      if (transactions.length > 0) {
+        const payWrap = document.createElement("div");
+        payWrap.className = "hist-pay-wrap";
+        const payLabel = document.createElement("div");
+        payLabel.className = "hist-pay-label";
+        payLabel.textContent = "Who paid who";
+        payWrap.appendChild(payLabel);
+
+        transactions.forEach((t) => {
+          const payRow = document.createElement("div");
+          payRow.className = "hist-pay-row";
+          payRow.innerHTML =
+            '<span class="hist-pay-from">' + escapeHtml(t.from) + '</span>' +
+            '<span class="hist-pay-arrow">pays</span>' +
+            '<span class="hist-pay-to">' + escapeHtml(t.to) + '</span>' +
+            '<span class="hist-pay-amt">' + fmt(t.amt) + '</span>';
+          payWrap.appendChild(payRow);
+        });
+
+        card.appendChild(payWrap);
+      }
+
+      historyListEl.appendChild(card);
+    });
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  addPlayerBtn.addEventListener("click", () => {
+    players.push(newPlayer(""));
+    render();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    loadDefault();
+    render();
+  });
+
+  document.getElementById("forgetNamesBtn").addEventListener("click", () => {
+    saveNames([]);
+    refreshDatalist();
+  });
+
+  saveSessionBtn.addEventListener("click", () => {
+    const nets = computeNets(players);
+    if (nets.length === 0) return;
+
+    const now = new Date();
+    const dateLabel = now.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) +
+      " · " + now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+    const session = {
+      id: "s" + now.getTime() + "_" + Math.random().toString(36).slice(2, 7),
+      dateLabel: dateLabel,
+      players: nets.map((p) => ({ name: p.name, buyIn: p.buyIn, cashOut: p.cashOut, net: p.net })),
+      transactions: computeTransactions(nets),
+    };
+
+    addSessionToHistory(session);
+    rememberCurrentNames();
+    refreshDatalist();
+    renderHistory();
+
+    saveSessionBtn.classList.add("saved");
+    saveSessionBtn.textContent = "Saved ✓";
+    setTimeout(() => {
+      saveSessionBtn.classList.remove("saved");
+      saveSessionBtn.textContent = "Save this session";
+    }, 1600);
+  });
+
+  clearHistoryBtn.addEventListener("click", () => {
+    saveHistory([]);
+    renderHistory();
+  });
+
+  initStorage();
+  loadDefault();
+  refreshDatalist();
+  renderHistory();
+  render();
+})();
+</script>
+</body>
+</html>
