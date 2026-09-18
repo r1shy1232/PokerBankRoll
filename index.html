@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Settle Up">
+<meta name="apple-mobile-web-app-title" content="Poker Bankroll">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f3d2e">
-<title>Settle Up</title>
+<title>Poker Bankroll</title>
 <style>
   :root {
     --felt: #0f3d2e;
@@ -46,7 +46,13 @@
 
   header {
     margin-bottom: 22px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
   }
+
+  .header-text { flex: 1; }
 
   .eyebrow-row {
     display: flex;
@@ -76,6 +82,35 @@
     margin-top: 4px;
     line-height: 1.4;
   }
+
+  .history-nav-btn {
+    background: rgba(242,237,225,0.08);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .history-nav-btn:hover { background: rgba(242,237,225,0.14); }
+  .history-nav-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--chip-gold);
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .back-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
 
   .pot-strip {
     display: flex;
@@ -245,7 +280,7 @@
   }
   .add-player-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
 
-  .settle-section h2 {
+  .settle-section h2, .history-section h2, .detail-section h2 {
     font-family: Georgia, serif;
     font-size: 18px;
     font-weight: 700;
@@ -280,7 +315,7 @@
     font-size: 15px;
   }
 
-  .empty-settle {
+  .empty-settle, .empty-history {
     color: rgba(242,237,225,0.4);
     font-size: 14px;
     padding: 16px 4px;
@@ -311,58 +346,63 @@
     color: var(--felt-dark);
   }
 
-  .history-section {
-    margin-top: 30px;
-  }
-
-  .history-section h2 {
-    font-family: Georgia, serif;
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 12px;
-    color: var(--chip-gold);
-  }
-
+  /* History list view */
   .history-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
+  .history-row-btn {
+    width: 100%;
+    text-align: left;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .history-row-btn:hover { border-color: rgba(201,162,75,0.4); }
+  .history-row-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
+
+  .history-row-btn .hrow-left { display: flex; flex-direction: column; gap: 3px; }
+  .history-row-btn .hrow-date { font-size: 14px; font-weight: 600; }
+  .history-row-btn .hrow-players {
+    font-size: 12px;
+    color: rgba(242,237,225,0.45);
+  }
+  .history-row-btn .hrow-chevron {
+    color: rgba(242,237,225,0.3);
+    font-size: 15px;
+  }
+
+  /* Session detail view */
   .history-card {
     background: rgba(0,0,0,0.2);
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 12px 14px;
+    padding: 16px 16px;
   }
 
-  .history-card .hist-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 8px;
-  }
-
-  .history-card .hist-date {
-    font-size: 13px;
-    color: rgba(242,237,225,0.5);
-  }
-
-  .history-card .hist-remove {
-    background: none;
-    border: none;
-    color: rgba(242,237,225,0.3);
+  .history-card .hist-date-big {
     font-size: 15px;
-    cursor: pointer;
-    padding: 2px 6px;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: 14px;
   }
-  .history-card .hist-remove:hover { color: var(--chip-red); }
 
   .history-card .hist-players {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 13px;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 6px;
   }
 
   .history-card .hist-player-row {
@@ -370,10 +410,13 @@
     grid-template-columns: 1fr auto auto;
     gap: 10px;
     align-items: baseline;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(242,237,225,0.06);
   }
 
   .history-card .hist-player-name {
-    color: rgba(242,237,225,0.75);
+    color: rgba(242,237,225,0.85);
+    font-weight: 600;
   }
 
   .history-card .hist-player-buyin {
@@ -388,6 +431,7 @@
     font-variant-numeric: tabular-nums;
     text-align: right;
     min-width: 66px;
+    font-weight: 600;
   }
 
   .history-card .hist-player-net.up { color: var(--up); }
@@ -395,16 +439,16 @@
   .history-card .hist-player-net.even { color: rgba(242,237,225,0.4); }
 
   .hist-pay-wrap {
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
     border-top: 1px solid var(--line);
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
   }
 
   .hist-pay-label {
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(242,237,225,0.4);
     margin-bottom: 2px;
   }
@@ -412,8 +456,11 @@
   .hist-pay-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    gap: 8px;
+    font-size: 14px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 7px;
+    padding: 9px 11px;
   }
 
   .hist-pay-from { color: var(--down); font-weight: 600; }
@@ -425,10 +472,17 @@
     font-weight: 700;
   }
 
+  .detail-delete-row {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
   .reset-row {
     margin-top: 28px;
     display: flex;
     justify-content: center;
+    gap: 10px;
   }
 
   .reset-btn {
@@ -446,52 +500,112 @@
   }
   .reset-btn:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
 
+  .tucked-row {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .tucked-link {
+    background: none;
+    border: none;
+    color: rgba(242,237,225,0.28);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 8px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .tucked-link:hover { color: rgba(215,138,110,0.75); }
+  .tucked-link:focus-visible { outline: 2px solid var(--chip-gold); outline-offset: 2px; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
   @media (prefers-reduced-motion: no-preference) {
-    .player-card, .settle-row { transition: border-color 0.15s ease; }
+    .player-card, .settle-row, .history-row-btn { transition: border-color 0.15s ease; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="eyebrow-row">
-      <h1>Settle Up</h1>
-      <span class="suit">♠</span>
+
+  <!-- MAIN TABLE VIEW -->
+  <div class="view active" id="view-main">
+    <header>
+      <div class="header-text">
+        <div class="eyebrow-row">
+          <h1>Poker Bankroll</h1>
+          <span class="suit">♠</span>
+        </div>
+        <div class="sub">Enter what everyone bought in for and cashed out with.</div>
+      </div>
+      <button class="history-nav-btn" id="openHistoryBtn">Past sessions</button>
+    </header>
+
+    <div class="pot-strip">
+      <div>
+        <div class="label">Buy-ins vs cash-outs</div>
+        <div class="value" id="potValue">$0</div>
+      </div>
     </div>
-    <div class="sub">Enter what everyone bought in for and cashed out with. This works out who pays who.</div>
-  </header>
 
-  <div class="pot-strip">
-    <div>
-      <div class="label">Buy-ins vs cash-outs</div>
-      <div class="value" id="potValue">$0</div>
+    <div class="players" id="players"></div>
+    <datalist id="savedNames"></datalist>
+
+    <button class="add-player-btn" id="addPlayerBtn">+ Add player</button>
+
+    <div class="settle-section">
+      <h2>Who pays who</h2>
+      <div class="settle-list" id="settleList"></div>
+    </div>
+
+    <div class="save-row">
+      <button class="save-session-btn" id="saveSessionBtn">Save this session</button>
+    </div>
+
+    <div class="reset-row">
+      <button class="reset-btn" id="resetBtn">Reset table</button>
+    </div>
+
+    <div class="tucked-row">
+      <button class="tucked-link" id="forgetNamesBtn">Forget saved names</button>
     </div>
   </div>
 
-  <div class="players" id="players"></div>
-  <datalist id="savedNames"></datalist>
-
-  <button class="add-player-btn" id="addPlayerBtn">+ Add player</button>
-
-  <div class="settle-section">
-    <h2>Who pays who</h2>
-    <div class="settle-list" id="settleList"></div>
+  <!-- HISTORY LIST VIEW -->
+  <div class="view" id="view-history-list">
+    <button class="back-btn" id="backFromListBtn">‹ Back</button>
+    <header>
+      <div class="header-text">
+        <div class="eyebrow-row">
+          <h1>Past sessions</h1>
+        </div>
+        <div class="sub">Tap a session to see buy-ins and who paid who.</div>
+      </div>
+    </header>
+    <div class="history-list" id="historyListEl"></div>
+    <div class="tucked-row">
+      <button class="tucked-link" id="clearHistoryBtnList">Clear all history</button>
+    </div>
   </div>
 
-  <div class="save-row">
-    <button class="save-session-btn" id="saveSessionBtn">Save this session</button>
+  <!-- SESSION DETAIL VIEW -->
+  <div class="view" id="view-history-detail">
+    <button class="back-btn" id="backFromDetailBtn">‹ Back to sessions</button>
+    <div class="detail-section">
+      <h2>Session details</h2>
+      <div id="detailCardWrap"></div>
+    </div>
+    <div class="detail-delete-row">
+      <button class="reset-btn" id="deleteSessionBtn">Delete this session</button>
+    </div>
+    <div class="tucked-row">
+      <button class="tucked-link" id="clearHistoryBtnDetail">Clear all history</button>
+    </div>
   </div>
 
-  <div class="history-section" id="historySection" hidden>
-    <h2>Past sessions</h2>
-    <div class="history-list" id="historyList"></div>
-  </div>
-
-  <div class="reset-row">
-    <button class="reset-btn" id="resetBtn">Reset table</button>
-    <button class="reset-btn" id="forgetNamesBtn" style="margin-left:10px;">Forget saved names</button>
-    <button class="reset-btn" id="clearHistoryBtn" style="margin-left:10px;">Clear history</button>
-  </div>
 </div>
 
 <script>
@@ -500,8 +614,11 @@
   let idCounter = 0;
   let savedNamesCache = [];
   let historyCache = [];
+  let currentDetailId = null;
+
   const STORAGE_KEY = "settleup_saved_names_v1";
   const HISTORY_KEY = "settleup_history_v1";
+  const LIVE_STATE_KEY = "settleup_live_state_v1";
 
   function initStorage() {
     try {
@@ -513,7 +630,6 @@
         }
       }
     } catch (e) {
-      // localStorage unavailable (private browsing, etc) — app still works, just won't remember names
       savedNamesCache = [];
     }
     try {
@@ -529,18 +645,18 @@
     }
   }
 
+  // ---- History storage ----
   function loadHistory() {
     return historyCache.slice();
   }
 
   function saveHistory(sessions) {
-    // Keep most recent 100 sessions to stay well under storage limits
-    const trimmed = sessions.slice(-100);
+    const trimmed = sessions.slice(-200);
     historyCache = trimmed;
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
     } catch (e) {
-      // storage full or unavailable — session list still works in-memory for this visit
+      // storage full or unavailable — list still works in-memory for this visit
     }
   }
 
@@ -552,6 +668,7 @@
     saveHistory(loadHistory().filter((s) => s.id !== sessionId));
   }
 
+  // ---- Saved names storage ----
   function loadSavedNames() {
     return savedNamesCache.slice();
   }
@@ -562,7 +679,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(unique));
     } catch (e) {
-      // storage full or unavailable — session still works, just won't persist
+      // storage full or unavailable
     }
   }
 
@@ -572,12 +689,50 @@
     saveNames(saved.concat(current));
   }
 
+  // ---- Live table state (auto-saved so it survives closing/backgrounding) ----
+  function saveLiveState() {
+    try {
+      localStorage.setItem(LIVE_STATE_KEY, JSON.stringify({
+        players: players.map((p) => ({ name: p.name, buyIn: p.buyIn, cashOut: p.cashOut })),
+      }));
+    } catch (e) {
+      // storage full or unavailable — current session just won't survive a close
+    }
+  }
+
+  function loadLiveState() {
+    try {
+      const raw = localStorage.getItem(LIVE_STATE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.players) && parsed.players.length > 0) {
+        return parsed;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearLiveState() {
+    try { localStorage.removeItem(LIVE_STATE_KEY); } catch (e) {}
+  }
+
   function newPlayer(name) {
     idCounter += 1;
     return { id: idCounter, name: name || "", buyIn: "", cashOut: "" };
   }
 
   function loadDefault() {
+    const live = loadLiveState();
+    if (live) {
+      players = live.players.map((p) => newPlayer(p.name)).map((p, i) => {
+        p.buyIn = live.players[i].buyIn || "";
+        p.cashOut = live.players[i].cashOut || "";
+        return p;
+      });
+      return;
+    }
     const saved = loadSavedNames();
     if (saved.length >= 2) {
       players = saved.slice(0, 2).map((n) => newPlayer(n));
@@ -588,29 +743,41 @@
     }
   }
 
+  function freshTable() {
+    players = [newPlayer(""), newPlayer("")];
+    clearLiveState();
+  }
+
+  // ---- DOM refs ----
   const playersEl = document.getElementById("players");
   const settleListEl = document.getElementById("settleList");
   const potValueEl = document.getElementById("potValue");
   const addPlayerBtn = document.getElementById("addPlayerBtn");
   const resetBtn = document.getElementById("resetBtn");
   const saveSessionBtn = document.getElementById("saveSessionBtn");
-  const historySection = document.getElementById("historySection");
-  const historyListEl = document.getElementById("historyList");
-  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+  const historyListEl = document.getElementById("historyListEl");
+  const detailCardWrap = document.getElementById("detailCardWrap");
+
+  const viewMain = document.getElementById("view-main");
+  const viewHistoryList = document.getElementById("view-history-list");
+  const viewHistoryDetail = document.getElementById("view-history-detail");
+
+  function showView(view) {
+    [viewMain, viewHistoryList, viewHistoryDetail].forEach((v) => v.classList.remove("active"));
+    view.classList.add("active");
+    window.scrollTo(0, 0);
+  }
 
   function fmt(n) {
     const sign = n < 0 ? "-" : "";
     return sign + "$" + Math.abs(n).toFixed(2).replace(/\.00$/, "");
   }
 
+  // ---- Main table rendering ----
   function render() {
     playersEl.innerHTML = "";
 
     players.forEach((p, i) => {
-      const buyIn = parseFloat(p.buyIn) || 0;
-      const cashOut = parseFloat(p.cashOut) || 0;
-      const net = cashOut - buyIn;
-
       const card = document.createElement("div");
       card.className = "player-card";
 
@@ -627,6 +794,7 @@
         p.name = e.target.value;
         renderSettle();
         renderPot();
+        saveLiveState();
       });
       nameInput.addEventListener("blur", () => {
         if (p.name && p.name.trim()) {
@@ -643,6 +811,7 @@
         removeBtn.setAttribute("aria-label", "Remove player");
         removeBtn.addEventListener("click", () => {
           players = players.filter((pl) => pl.id !== p.id);
+          saveLiveState();
           render();
         });
         nameRow.appendChild(removeBtn);
@@ -671,6 +840,7 @@
         renderSettle();
         renderPot();
         updateNetTag(card, p);
+        saveLiveState();
       });
       buyWrap.appendChild(buyInput);
       buyField.appendChild(buyLabel);
@@ -694,6 +864,7 @@
         renderSettle();
         renderPot();
         updateNetTag(card, p);
+        saveLiveState();
       });
       cashWrap.appendChild(cashInput);
       cashField.appendChild(cashLabel);
@@ -825,86 +996,118 @@
     });
   }
 
-  function renderHistory() {
-    const sessions = loadHistory().slice().reverse(); // most recent first
+  // ---- History list view ----
+  function renderHistoryList() {
+    const sessions = loadHistory().slice().sort((a, b) => b.timestamp - a.timestamp);
     historyListEl.innerHTML = "";
 
     if (sessions.length === 0) {
-      historySection.hidden = true;
+      const empty = document.createElement("div");
+      empty.className = "empty-history";
+      empty.textContent = "No saved sessions yet.";
+      historyListEl.appendChild(empty);
       return;
     }
 
-    historySection.hidden = false;
-
     sessions.forEach((session) => {
-      const card = document.createElement("div");
-      card.className = "history-card";
+      const btn = document.createElement("button");
+      btn.className = "history-row-btn";
 
-      const top = document.createElement("div");
-      top.className = "hist-top";
+      const left = document.createElement("div");
+      left.className = "hrow-left";
 
       const dateEl = document.createElement("div");
-      dateEl.className = "hist-date";
+      dateEl.className = "hrow-date";
       dateEl.textContent = session.dateLabel;
-      top.appendChild(dateEl);
+      left.appendChild(dateEl);
 
-      const removeBtn = document.createElement("button");
-      removeBtn.className = "hist-remove";
-      removeBtn.textContent = "✕";
-      removeBtn.setAttribute("aria-label", "Delete this session");
-      removeBtn.addEventListener("click", () => {
-        removeSessionFromHistory(session.id);
-        renderHistory();
-      });
-      top.appendChild(removeBtn);
+      const playersEl2 = document.createElement("div");
+      playersEl2.className = "hrow-players";
+      const names = session.players.map((p) => p.name).join(", ");
+      playersEl2.textContent = session.players.length + " players · " + names;
+      left.appendChild(playersEl2);
 
-      card.appendChild(top);
+      btn.appendChild(left);
 
-      const playersWrap = document.createElement("div");
-      playersWrap.className = "hist-players";
+      const chevron = document.createElement("span");
+      chevron.className = "hrow-chevron";
+      chevron.textContent = "›";
+      btn.appendChild(chevron);
 
-      session.players.forEach((p) => {
-        const row = document.createElement("div");
-        row.className = "hist-player-row";
-        let cls = "even";
-        let text = "even";
-        if (p.net > 0.001) { cls = "up"; text = "up " + fmt(p.net); }
-        else if (p.net < -0.001) { cls = "down"; text = "down " + fmt(Math.abs(p.net)); }
-        const buyInText = "bought in " + fmt(p.buyIn);
-        row.innerHTML =
-          '<span class="hist-player-name">' + escapeHtml(p.name) + '</span>' +
-          '<span class="hist-player-buyin">' + buyInText + '</span>' +
-          '<span class="hist-player-net ' + cls + '">' + text + '</span>';
-        playersWrap.appendChild(row);
+      btn.addEventListener("click", () => {
+        currentDetailId = session.id;
+        renderDetailView();
+        showView(viewHistoryDetail);
       });
 
-      card.appendChild(playersWrap);
-
-      const transactions = session.transactions || [];
-      if (transactions.length > 0) {
-        const payWrap = document.createElement("div");
-        payWrap.className = "hist-pay-wrap";
-        const payLabel = document.createElement("div");
-        payLabel.className = "hist-pay-label";
-        payLabel.textContent = "Who paid who";
-        payWrap.appendChild(payLabel);
-
-        transactions.forEach((t) => {
-          const payRow = document.createElement("div");
-          payRow.className = "hist-pay-row";
-          payRow.innerHTML =
-            '<span class="hist-pay-from">' + escapeHtml(t.from) + '</span>' +
-            '<span class="hist-pay-arrow">pays</span>' +
-            '<span class="hist-pay-to">' + escapeHtml(t.to) + '</span>' +
-            '<span class="hist-pay-amt">' + fmt(t.amt) + '</span>';
-          payWrap.appendChild(payRow);
-        });
-
-        card.appendChild(payWrap);
-      }
-
-      historyListEl.appendChild(card);
+      historyListEl.appendChild(btn);
     });
+  }
+
+  // ---- Session detail view ----
+  function renderDetailView() {
+    const session = loadHistory().find((s) => s.id === currentDetailId);
+    detailCardWrap.innerHTML = "";
+    if (!session) {
+      const empty = document.createElement("div");
+      empty.className = "empty-history";
+      empty.textContent = "This session was removed.";
+      detailCardWrap.appendChild(empty);
+      return;
+    }
+
+    const card = document.createElement("div");
+    card.className = "history-card";
+
+    const dateBig = document.createElement("div");
+    dateBig.className = "hist-date-big";
+    dateBig.textContent = session.dateLabel;
+    card.appendChild(dateBig);
+
+    const playersWrap = document.createElement("div");
+    playersWrap.className = "hist-players";
+
+    session.players.forEach((p) => {
+      const row = document.createElement("div");
+      row.className = "hist-player-row";
+      let cls = "even";
+      let text = "even";
+      if (p.net > 0.001) { cls = "up"; text = "up " + fmt(p.net); }
+      else if (p.net < -0.001) { cls = "down"; text = "down " + fmt(Math.abs(p.net)); }
+      const buyInText = "bought in " + fmt(p.buyIn);
+      row.innerHTML =
+        '<span class="hist-player-name">' + escapeHtml(p.name) + '</span>' +
+        '<span class="hist-player-buyin">' + buyInText + '</span>' +
+        '<span class="hist-player-net ' + cls + '">' + text + '</span>';
+      playersWrap.appendChild(row);
+    });
+
+    card.appendChild(playersWrap);
+
+    const transactions = session.transactions || [];
+    if (transactions.length > 0) {
+      const payWrap = document.createElement("div");
+      payWrap.className = "hist-pay-wrap";
+      const payLabel = document.createElement("div");
+      payLabel.className = "hist-pay-label";
+      payLabel.textContent = "Who paid who";
+      payWrap.appendChild(payLabel);
+
+      transactions.forEach((t) => {
+        const payRow = document.createElement("div");
+        payRow.className = "hist-pay-row";
+        payRow.innerHTML =
+          '<span class="hist-pay-from">' + escapeHtml(t.from) + '</span>' +
+          '<span class="hist-pay-arrow">pays</span>' +
+          '<span class="hist-pay-to">' + escapeHtml(t.to) + '</span>' +
+          '<span class="hist-pay-amt">' + fmt(t.amt) + '</span>';
+        payWrap.appendChild(payRow);
+      });
+
+      card.appendChild(payWrap);
+    }
+
+    detailCardWrap.appendChild(card);
   }
 
   function escapeHtml(s) {
@@ -913,13 +1116,15 @@
     return div.innerHTML;
   }
 
+  // ---- Event wiring ----
   addPlayerBtn.addEventListener("click", () => {
     players.push(newPlayer(""));
+    saveLiveState();
     render();
   });
 
   resetBtn.addEventListener("click", () => {
-    loadDefault();
+    freshTable();
     render();
   });
 
@@ -933,11 +1138,12 @@
     if (nets.length === 0) return;
 
     const now = new Date();
-    const dateLabel = now.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) +
+    const dateLabel = now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) +
       " · " + now.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
     const session = {
       id: "s" + now.getTime() + "_" + Math.random().toString(36).slice(2, 7),
+      timestamp: now.getTime(),
       dateLabel: dateLabel,
       players: nets.map((p) => ({ name: p.name, buyIn: p.buyIn, cashOut: p.cashOut, net: p.net })),
       transactions: computeTransactions(nets),
@@ -946,7 +1152,6 @@
     addSessionToHistory(session);
     rememberCurrentNames();
     refreshDatalist();
-    renderHistory();
 
     saveSessionBtn.classList.add("saved");
     saveSessionBtn.textContent = "Saved ✓";
@@ -956,15 +1161,44 @@
     }, 1600);
   });
 
-  clearHistoryBtn.addEventListener("click", () => {
-    saveHistory([]);
-    renderHistory();
+  document.getElementById("openHistoryBtn").addEventListener("click", () => {
+    renderHistoryList();
+    showView(viewHistoryList);
   });
 
+  document.getElementById("backFromListBtn").addEventListener("click", () => {
+    showView(viewMain);
+  });
+
+  document.getElementById("backFromDetailBtn").addEventListener("click", () => {
+    renderHistoryList();
+    showView(viewHistoryList);
+  });
+
+  document.getElementById("deleteSessionBtn").addEventListener("click", () => {
+    if (currentDetailId) {
+      removeSessionFromHistory(currentDetailId);
+      currentDetailId = null;
+    }
+    renderHistoryList();
+    showView(viewHistoryList);
+  });
+
+  function clearAllHistory() {
+    saveHistory([]);
+    renderHistoryList();
+  }
+
+  document.getElementById("clearHistoryBtnList").addEventListener("click", clearAllHistory);
+  document.getElementById("clearHistoryBtnDetail").addEventListener("click", () => {
+    clearAllHistory();
+    showView(viewHistoryList);
+  });
+
+  // ---- Boot ----
   initStorage();
   loadDefault();
   refreshDatalist();
-  renderHistory();
   render();
 })();
 </script>
