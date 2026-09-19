@@ -6,10 +6,10 @@
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Poker Bankroll">
+<meta name="apple-mobile-web-app-title" content="Poker BankRoll">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f3d2e">
-<title>Poker Bankroll</title>
+<title>Poker BankRoll</title>
 <style>
   :root {
     --felt: #0f3d2e;
@@ -166,8 +166,13 @@
     gap: 8px;
   }
 
-  .player-name-row input[type="text"] {
+  .name-input-wrap {
+    position: relative;
     flex: 1;
+  }
+
+  .player-name-row input[type="text"] {
+    width: 100%;
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--line);
@@ -181,6 +186,45 @@
   .player-name-row input[type="text"]:focus {
     outline: none;
     border-bottom-color: var(--chip-gold);
+  }
+
+  .name-suggest-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--felt-dark);
+    border: 1px solid rgba(201,162,75,0.35);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    z-index: 20;
+    max-height: 180px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .name-suggest-list.open { display: block; }
+
+  .name-suggest-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--cream);
+    font-size: 15px;
+    font-family: inherit;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  .name-suggest-item:hover,
+  .name-suggest-item.highlighted {
+    background: rgba(201,162,75,0.16);
+  }
+
+  .name-suggest-item + .name-suggest-item {
+    border-top: 1px solid rgba(242,237,225,0.06);
   }
 
   .remove-btn {
@@ -537,7 +581,7 @@
     <header>
       <div class="header-text">
         <div class="eyebrow-row">
-          <h1>Poker Bankroll</h1>
+          <h1>Poker BankRoll</h1>
           <span class="suit">♠</span>
         </div>
         <div class="sub">Enter what everyone bought in for and cashed out with.</div>
@@ -553,7 +597,6 @@
     </div>
 
     <div class="players" id="players"></div>
-    <datalist id="savedNames"></datalist>
 
     <button class="add-player-btn" id="addPlayerBtn">+ Add player</button>
 
@@ -785,25 +828,79 @@
       const nameRow = document.createElement("div");
       nameRow.className = "player-name-row";
 
+      const nameWrap = document.createElement("div");
+      nameWrap.className = "name-input-wrap";
+
       const nameInput = document.createElement("input");
       nameInput.type = "text";
       nameInput.placeholder = "Player " + (i + 1);
       nameInput.value = p.name;
-      nameInput.setAttribute("list", "savedNames");
+      nameInput.setAttribute("autocomplete", "off");
+      nameInput.setAttribute("autocorrect", "off");
       nameInput.setAttribute("aria-label", "Player name");
+
+      const suggestList = document.createElement("div");
+      suggestList.className = "name-suggest-list";
+
+      function closeSuggestions() {
+        suggestList.classList.remove("open");
+        suggestList.innerHTML = "";
+      }
+
+      function openSuggestions() {
+        const query = (nameInput.value || "").trim().toLowerCase();
+        const all = loadSavedNames();
+        const matches = all.filter((n) => n.toLowerCase().includes(query)).slice(0, 8);
+        // when the field is empty, show everything saved (most recently used first is fine as-is)
+        const list = query === "" ? all.slice(0, 8) : matches;
+
+        if (list.length === 0) {
+          closeSuggestions();
+          return;
+        }
+
+        suggestList.innerHTML = "";
+        list.forEach((n) => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "name-suggest-item";
+          item.textContent = n;
+          // mousedown fires before input's blur, so the click registers before we hide the list
+          item.addEventListener("mousedown", (evt) => {
+            evt.preventDefault();
+            nameInput.value = n;
+            p.name = n;
+            renderSettle();
+            renderPot();
+            saveLiveState();
+            closeSuggestions();
+          });
+          suggestList.appendChild(item);
+        });
+        suggestList.classList.add("open");
+      }
+
       nameInput.addEventListener("input", (e) => {
         p.name = e.target.value;
         renderSettle();
         renderPot();
         saveLiveState();
+        openSuggestions();
+      });
+      nameInput.addEventListener("focus", () => {
+        openSuggestions();
       });
       nameInput.addEventListener("blur", () => {
+        closeSuggestions();
         if (p.name && p.name.trim()) {
           saveNames(loadSavedNames().concat([p.name]));
           refreshDatalist();
         }
       });
-      nameRow.appendChild(nameInput);
+
+      nameWrap.appendChild(nameInput);
+      nameWrap.appendChild(suggestList);
+      nameRow.appendChild(nameWrap);
 
       if (players.length > 1) {
         const removeBtn = document.createElement("button");
@@ -988,13 +1085,8 @@
   }
 
   function refreshDatalist() {
-    const listEl = document.getElementById("savedNames");
-    listEl.innerHTML = "";
-    loadSavedNames().forEach((n) => {
-      const opt = document.createElement("option");
-      opt.value = n;
-      listEl.appendChild(opt);
-    });
+    // No-op: suggestions are now read live from savedNamesCache each time
+    // the custom dropdown opens, so there's nothing to pre-build here.
   }
 
   // ---- History list view ----
